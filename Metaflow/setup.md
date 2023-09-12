@@ -24,7 +24,7 @@ E: Unable to correct problems, you have held broken packages.
 
 Despite my efforts in addressing the missing dependencies and configurations, I was unable to overcome this error. Consequently, the R installation failure on WSL prevented me from downloading the Metaflow CLI.
 
-5. Demo Script Inclusion: In anticipation of a successful CLI setup, I prepared a demonstration script detailing its usage.
+5. Demo Script: In anticipation of a successful CLI setup, I prepared a demo script for testing.
 
 Final Thoughts:
 
