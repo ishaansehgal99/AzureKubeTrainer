@@ -1,0 +1,31 @@
+# permissions for end users to edit trainingjobs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: trainingjob-editor-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: nccl
+    app.kubernetes.io/part-of: nccl
+    app.kubernetes.io/managed-by: kustomize
+  name: trainingjob-editor-role
+rules:
+- apiGroups:
+  - training.azure.kube.trainer
+  resources:
+  - trainingjobs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - training.azure.kube.trainer
+  resources:
+  - trainingjobs/status
+  verbs:
+  - get
