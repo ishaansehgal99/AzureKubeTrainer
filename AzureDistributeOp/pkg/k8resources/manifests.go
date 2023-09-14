@@ -115,5 +115,26 @@ func GenerateStatefulSetManifest(ctx context.Context, trainingJob *trainingv1.Tr
 				},
 			},
 		},
+		VolumeClaimTemplates: []corev1.PersistentVolumeClaim{
+			{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "azure-blob-storage",
+					Annotations: map[string]string{
+						"volume.beta.kubernetes.io/storage-class": "azureblob-nfs-premium",
+					},
+				},
+				Spec: corev1.PersistentVolumeClaimSpec{
+					StorageClassName: "blob-storage",
+					AccessModes: []corev1.PersistentVolumeAccessMode{
+						corev1.ReadWriteMany,
+					},
+					Resources: corev1.ResourceRequirements{
+						Requests: corev1.ResourceList{
+							corev1.ResourceStorage: resource.MustParse("5Gi"),
+						},
+					},
+				},
+			},
+		},
 	}
 }
