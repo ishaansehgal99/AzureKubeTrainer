@@ -1,0 +1,11 @@
+apiVersion: training.azure.kube.trainer/v1
+kind: TrainingJob
+metadata:
+  name: example-trainingjob
+spec:
+  replicas: 3
+  procpernode: 2
+  image: "busybox"
+  labelSelector:
+    matchLabels:
+      component: training
