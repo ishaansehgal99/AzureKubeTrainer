@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/ishaansehgal99/AzureKubeTrainer/pkg/k8resources"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -96,9 +97,9 @@ func createService(ctx context.Context, serviceObj *v1.Service, kubeClient clien
 }
 
 func buildCommand(baseCommand string, torchRunParams map[string]string) []string {
-	var updatedBaseCommand string
+	updatedBaseCommand := baseCommand
 	for key, value := range torchRunParams {
-		updatedBaseCommand = fmt.Sprintf("%s --%s=%s", baseCommand, key, value)
+		updatedBaseCommand = fmt.Sprintf("%s --%s=%s", updatedBaseCommand, key, value)
 	}
 
 	commands := []string{
@@ -112,14 +113,15 @@ func buildCommand(baseCommand string, torchRunParams map[string]string) []string
 
 func (r *TrainingJobReconciler) createStatefulsetIfNil(ctx context.Context, trainingObj *trainingv1.TrainingJob) error {
 	// Check if statefulset already exists
-	err := getResource(ctx, trainingObj.Name, trainingObj.Namespace, r.Client, trainingObj)
+	existingSS := &appsv1.StatefulSet{}
+	err := getResource(ctx, trainingObj.Name, trainingObj.Namespace, r.Client, existingSS)
 	if err != nil && !errors.IsNotFound(err) {
 		klog.ErrorS(err, "failed to check for existing TrainingJob", "TrainingJob", trainingObj)
 		return err
 	}
 
-	if trainingObj.GetName() != "" && trainingObj.GetNamespace() != "" {
-		klog.InfoS("a trainingObj already exists", "TrainingJob", klog.KObj(trainingObj))
+	if existingSS.GetName() != "" && existingSS.GetNamespace() != "" {
+		klog.InfoS("a trainingObj already exists", "TrainingJob", klog.KObj(existingSS))
 		return nil
 	}
 
@@ -135,18 +137,22 @@ func (r *TrainingJobReconciler) createStatefulsetIfNil(ctx context.Context, trai
 	torchRunParams["nnodes"] = strconv.Itoa(replicas)
 	torchRunParams["node_rank"] = "$(echo $HOSTNAME | grep -o '[^-]*$')"
 	torchRunParams["nproc_per_node"] = strconv.Itoa(procPerNode)
-	torchRunParams["master_addr"] = existingSVC.Spec.LoadBalancerIP
+	torchRunParams["master_addr"] = existingSVC.Spec.ClusterIP
 	torchRunParams["master_port"] = "80"
+
+	fmt.Println("COMMANDS", torchRunParams)
 
 	commands := buildCommand("torchrun training.py", torchRunParams)
 
+	fmt.Println("COMMANDS", commands)
+
 	resourceRequirements := corev1.ResourceRequirements{
 		Limits: corev1.ResourceList{
-			corev1.ResourceName("nvidia.com/gpu"): resource.MustParse("4"),
+			corev1.ResourceName("nvidia.com/gpu"): resource.MustParse("1"),
 		},
 		Requests: corev1.ResourceList{
-			corev1.ResourceName("nvidia.com/gpu"): resource.MustParse("4"),
-			corev1.ResourceEphemeralStorage:       resource.MustParse("300Gi"),
+			corev1.ResourceName("nvidia.com/gpu"): resource.MustParse("1"),
+			//corev1.ResourceEphemeralStorage:       resource.MustParse("300Gi"),
 		},
 	}
 
@@ -188,10 +194,10 @@ func (r *TrainingJobReconciler) createStatefulsetIfNil(ctx context.Context, trai
 		},
 	}
 
-	depObj := k8resources.GenerateStatefulSetManifest(ctx, trainingObj, PresetSetModelllama2CChatImage, /*todo put image here*/
+	ssObj := k8resources.GenerateStatefulSetManifest(ctx, trainingObj, trainingObj.Spec.Image,
 		replicas, commands, containerPorts, resourceRequirements, volumeMount, tolerations, volume)
 
-	if err := createResource(ctx, depObj, r.Client); err != nil {
+	if err := createResource(ctx, ssObj, r.Client); err != nil {
 		return err
 	}
 
@@ -202,14 +208,17 @@ func (r *TrainingJobReconciler) createServiceIfNil(ctx context.Context, training
 	// Check if service already exists
 	existingSVC := &v1.Service{}
 	err := getResource(ctx, trainingObj.Name, trainingObj.Namespace, r.Client, existingSVC)
-	if err != nil && !errors.IsNotFound(err) {
-		return err
-	}
-	if existingSVC != nil {
-		klog.InfoS("a service already exists for TrainingJob", "TrainingJob", klog.KObj(trainingObj), "serviceType", corev1.ServiceTypeLoadBalancer)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			klog.InfoS("No service exists for TrainingJob. Creating one...", "TrainingJob", klog.KObj(trainingObj))
+			// Continue with logic to create service
+		} else {
+			return err
+		}
+	} else {
+		klog.InfoS("A service already exists for TrainingJob", "TrainingJob", klog.KObj(trainingObj), "serviceType", corev1.ServiceTypeLoadBalancer)
 		return nil
 	}
-
 	// If service doesn't exist, create it
 	serviceObj := k8resources.GenerateServiceManifest(ctx, trainingObj)
 	err = createService(ctx, serviceObj, r.Client)
