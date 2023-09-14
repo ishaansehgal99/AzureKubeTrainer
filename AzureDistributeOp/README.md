@@ -1,11 +1,9 @@
 # AzureDistributeOperator
 
+## Description
 The AzureDistributeOperator is a Kubernetes operator designed to facilitate distributed deep learning training using PyTorch. It orchestrates the deployment of statefulset pods across different nodes in a Kubernetes cluster, ensuring a scalable and efficient distribution of training tasks.
 
 To facilitate inter-pod communication, which is essential for distributed training, the operator exposes the master's IP address using the ClusterIP service. This design allows the pods to work in unison, effectively partitioning the training workload while synchronizing to produce a cohesive model. Tailored for the Azure environment, this operator simplifies the complexities of setting up distributed training, ensuring that users can focus on model development while the infrastructure handles scalability and distribution.
-
-## Description
-// TODO(user): An in-depth paragraph about your project and overview of use
 
 ## Getting Started
 You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.
