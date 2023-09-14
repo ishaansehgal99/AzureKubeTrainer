@@ -70,23 +70,6 @@ func createResource(ctx context.Context, resource client.Object, kubeClient clie
 	})
 }
 
-//func getService(ctx context.Context, name, namespace string, kubeClient client.Client) (*v1.Service, error) {
-//	klog.InfoS("GetService", "serviceName", name, "serviceNamespace", namespace)
-//
-//	svc := &v1.Service{}
-//	err := retry.OnError(retry.DefaultBackoff, func(err error) bool {
-//		return true
-//	}, func() error {
-//		return kubeClient.Get(ctx, client.ObjectKey{Name: name, Namespace: namespace}, svc, &client.GetOptions{})
-//	})
-//
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	return svc, nil
-//}
-
 func createService(ctx context.Context, serviceObj *v1.Service, kubeClient client.Client) error {
 	klog.InfoS("CreateService", "service", klog.KObj(serviceObj))
 	return retry.OnError(retry.DefaultBackoff, func(err error) bool {
