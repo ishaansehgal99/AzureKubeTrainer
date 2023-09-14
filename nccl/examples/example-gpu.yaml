@@ -3,5 +3,9 @@ kind: TrainingJob
 metadata:
   name: example-trainingjob
 spec:
-  replicas: 2
-  image: "your-training-image:latest"
+  replicas: 3
+  procpernode: 2
+  image: "my-training-image:v1"
+  labelSelector:
+    matchLabels:
+      component: training

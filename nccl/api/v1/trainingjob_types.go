@@ -25,7 +25,8 @@ import (
 
 // TrainingJobSpec defines the desired state of TrainingJob
 type TrainingJobSpec struct {
-	Replicas      int32                 `json:"replicas"`
+	Replicas      int                   `json:"replicas"`
+	ProcPerNode   int                   `json:"procpernode"`
 	Image         string                `json:"image"`
 	LabelSelector *metav1.LabelSelector `json:"labelSelector,omitempty"`
 
