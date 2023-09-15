@@ -61,5 +61,8 @@ def main():
         accuracy = evaluate(model=model, device=device, test_loader=test_loader)
         print(f"Epoch: {epoch}, Accuracy: {accuracy}")
 
+    if torch.distributed.get_rank() == 0:
+        torch.save(model.state_dict(), "/dev/azureblob/model_weights.pth")
+
 if __name__ == "__main__":
     main()

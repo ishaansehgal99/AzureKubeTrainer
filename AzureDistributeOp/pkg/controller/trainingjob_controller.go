@@ -144,6 +144,14 @@ func (r *TrainingJobReconciler) createStatefulsetIfNil(ctx context.Context, trai
 				},
 			},
 		},
+		{
+			Name: "volume",
+			VolumeSource: corev1.VolumeSource{
+				PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+					ClaimName: "azure-blob-storage",
+				},
+			},
+		},
 	}
 
 	volumeMount := []corev1.VolumeMount{}
@@ -151,6 +159,10 @@ func (r *TrainingJobReconciler) createStatefulsetIfNil(ctx context.Context, trai
 		volumeMount = append(volumeMount, corev1.VolumeMount{
 			Name:      volume[0].Name,
 			MountPath: "/dev/shm",
+		},
+		corev1.VolumeMount{
+			Name:      volume[1].Name,
+			MountPath: "/dev/azureblob",
 		})
 	}
 
