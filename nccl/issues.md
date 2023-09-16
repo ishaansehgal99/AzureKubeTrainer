@@ -1,6 +1,6 @@
 ## failed to setup ring 
 
-## errror
+### errror
 
 ```shell
 torch.distributed.DistBackendError: NCCL error in: /opt/pytorch/pytorch/torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp:1197, internal error - please report this issue to the NCCL developers, NCCL version 2.18.3
@@ -62,7 +62,14 @@ Error : ring 1 does not contain rank 0
     work = group.broadcast([tensor], opts)
 ```
 
-## solution
+### solution
 run pytorch job with following envs
 export NCCL_DEBUG=1
 export NCCL_P2P_DISABLE=1
+
+
+## NCCL shared memory should not be enabled. 
+
+### solution
+run pytorch job with following envs
+NCCL_SHM_DISABLE=1 
