@@ -95,3 +95,4 @@ spec:
     key: nvidia.com/gpu
     operator: Exists
 ```
+One interesting thing I learned is that https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#extendedresourcetoleration can auto tolerate pods
