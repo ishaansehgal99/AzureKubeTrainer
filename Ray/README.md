@@ -36,13 +36,13 @@ az aks nodepool add --resource-group hackathonProject2 --cluster-name gpu-cluste
 helm repo add kuberay https://ray-project.github.io/kuberay-helm/
 helm install kuberay-operator kuberay/kuberay-operator --version 0.6.0
  
-# Create a Ray cluster. Add the following to the end of the provided yaml file:
+# Create a Ray cluster. Ensure that the end of the provided yaml file contains the following:
 #         tolerations:
 #       - key: "sku"
 #         operator: "Equal"
 #         value: "gpu"
 #         effect: "NoSchedule"
-kubectl apply -f https://raw.githubusercontent.com/ray-project/ray/master/doc/source/cluster/kubernetes/configs/ray-cluster.gpu.yaml
+kubectl apply -f ray-cluster.gpu-aks.yaml
  
 # Set up port-forwarding
 kubectl port-forward --address 0.0.0.0 services/raycluster-head-svc 8265:8265
