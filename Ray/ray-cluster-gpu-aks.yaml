@@ -70,8 +70,8 @@ spec:
               cpu: "4"
               memory: "12G"
               nvidia.com/gpu: 1
-       tolerations:
-       - key: "sku"
-         operator: "Equal"
-         value: "gpu"
-         effect: "NoSchedule"
+        tolerations:
+        - key: "sku"
+          operator: "Equal"
+          value: "gpu"
+          effect: "NoSchedule"
